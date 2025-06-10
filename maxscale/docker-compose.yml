@@ -1,29 +1,31 @@
-version: '2'
+version: '3.8'
 
 services:
   shard1:
-    image: mariadb:10.3
+    image: mariadb:10.6
     container_name: shard1
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: zipcodes_one
-    volumes:
-      - ./shard1.sql:/docker-entrypoint-initdb.d/init.sql
-    command: --server-id=1
     ports:
       - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: zipcodes_one
+      MYSQL_USER: maxuser
+      MYSQL_PASSWORD: maxpwd
+    volumes:
+      - ./shard1.sql:/docker-entrypoint-initdb.d/shard1.sql
 
   shard2:
-    image: mariadb:10.3
+    image: mariadb:10.6
     container_name: shard2
-    environment:
-      MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: zipcodes_two
-    volumes:
-      - ./shard2.sql:/docker-entrypoint-initdb.d/init.sql
-    command: --server-id=2
     ports:
       - "3308:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: zipcodes_two
+      MYSQL_USER: maxuser
+      MYSQL_PASSWORD: maxpwd
+    volumes:
+      - ./shard2.sql:/docker-entrypoint-initdb.d/shard2.sql
 
   maxscale:
     image: mariadb/maxscale:latest
@@ -33,7 +35,8 @@ services:
       - shard2
     ports:
       - "4006:4006"
-      - "8989:8989" # MaxScale admin API
+      - "8989:8989"
     volumes:
-      - ./maxscale.cnf.d:/etc/maxscale.cnf.d
+      - ./maxscale.cnf:/etc/maxscale.cnf
+    command: ["maxscale", "-f", "/etc/maxscale.cnf", "-d"]
 
