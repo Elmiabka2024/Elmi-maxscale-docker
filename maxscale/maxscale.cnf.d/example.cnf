@@ -37,5 +37,6 @@ password=maxpwd
 type=listener
 service=Sharding-Service
 protocol=MariaDBClient
+address=0.0.0.0
 port=4006
 
