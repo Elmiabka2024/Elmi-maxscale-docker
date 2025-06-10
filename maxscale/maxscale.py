@@ -9,21 +9,28 @@ from mysql.connector import Error
 
 def connect_to_maxscale():
     try:
+        print("Attempting connection to MaxScale...")
         connection = mysql.connector.connect(
-            host='10.0.2.15',        # MaxScale IP address 
-            port=4006,              # MaxScale port
-            user='maxuser',         # Username from example.cnf
-            password='maxpwd',      # Password from example.cnf
-            database='zipcodes_one' # Database you want to query
+            host='127.0.0.1',       # Change to '10.0.2.15' if needed
+            port=4006,
+            user='maxuser',
+            password='maxpwd',
+            database='zipcodes_one',
+            connection_timeout=5
         )
 
         if connection.is_connected():
             print("Connected to MaxScale successfully!")
 
             cursor = connection.cursor()
-            cursor.execute("SELECT COUNT(*) FROM zipcodes_one;")
+            cursor.execute("SHOW DATABASES;")
+            databases = cursor.fetchall()
+            print("Available databases:", databases)
+
+            
+            cursor.execute("SELECT COUNT(*) FROM your_table;")
             result = cursor.fetchone()
-            print(f"Number of rows in zipcodes_one: {result[0]}")
+            print(f"Number of rows in your_table: {result[0]}")
 
             cursor.close()
             connection.close()
