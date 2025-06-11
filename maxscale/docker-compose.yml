@@ -1,4 +1,4 @@
-#version: '3.8'
+#version: "3.8"
 
 services:
   shard1:
@@ -26,15 +26,17 @@ services:
       - ./shard2.sql:/docker-entrypoint-initdb.d/init.sql
 
   maxscale:
-    image: mariadb/maxscale:latest
+    build: 
+      context: .
+      dockerfile: Dockerfile  # This assumes your Dockerfile is named `Dockerfile` in the current directory
     container_name: maxscale
     depends_on:
       - shard1
       - shard2
     ports:
-      - "4006:4006"   # MaxScale port
-      - "8989:8989"   # MaxScale admin
+      - "4006:4006"   # MaxScale database port
+      - "8989:8989"   # MaxScale admin port
     volumes:
-      - ./maxscale.cnf.d/example.cnf:/etc/maxscale.cnf.d/example.cnf:ro
-    command: ["maxscale", "-f", "/etc/maxscale.cnf.d/example.cnf", "-d"]
+      - ./maxscale.cnf:/etc/maxscale.cnf:ro
+    command: ["maxscale", "-f", "/etc/maxscale.cnf", "-d"]
 
