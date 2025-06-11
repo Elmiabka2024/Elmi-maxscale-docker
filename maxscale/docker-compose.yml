@@ -30,6 +30,7 @@ services:
   maxscale:
     image: mariadb/maxscale:latest
     container_name: maxscale
+    user: "1000:1000"
     depends_on:
       - shard1
       - shard2
