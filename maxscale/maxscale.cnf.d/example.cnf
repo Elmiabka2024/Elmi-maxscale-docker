@@ -20,6 +20,7 @@ router=readwritesplit
 servers=server1,server2
 user=maxuser
 password=maxpwd
+master_failure_mode=fail_on_write
 
 [MyListener]
 type=listener
