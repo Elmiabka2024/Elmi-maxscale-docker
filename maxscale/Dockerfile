@@ -1,37 +1,26 @@
 FROM ubuntu:bionic
 
-ARG VERSION
-ARG GIT_COMMIT
-ARG GIT_TREE_STATE
-ARG BUILD_TIME
+# Add MariaDB MaxScale APT repo
+COPY maxscale.list /etc/apt/sources.list.d/maxscale.list
 
-# Add MaxScale APT repository
-COPY maxscale.list /etc/apt/sources.list.d/maxscale.list.tmp
+# Install MaxScale
+RUN apt-get update && \
+    apt-get install -y gnupg2 ca-certificates && \
+    apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 0x135659e928c12247 && \
+    apt-get update && \
+    apt-get install -y maxscale && \
+    rm -rf /var/lib/apt/lists/*
 
-RUN apt-get -y update && \
-    apt-get -y install gnupg2 ca-certificates && \
-    apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys "0x135659e928c12247" && \
-    mv /etc/apt/sources.list.d/maxscale.list.tmp /etc/apt/sources.list.d/maxscale.list && \
-    apt-get -y update && \
-    apt-get -y install maxscale && \
-    rm -rf /var/lib/apt/lists/* && \
-    if [ -n "$VERSION" ] && [ -n "$GIT_COMMIT" ] && [ -n "$BUILD_TIME" ]; then \
-      printf "Version:    %s\nGit commit: %s%s\nBuilt:      %s\n" "$VERSION" "$GIT_COMMIT" "$GIT_TREE_STATE" "$BUILD_TIME" > /opt/image_details; \
-    fi
+# Add MaxScale config
+COPY maxscale.cnf /etc/
 
-# Create non-root user and set permissions
+# Create a non-root user
 RUN useradd -ms /bin/bash maxscaleuser && \
     mkdir -p /var/run/maxscale && \
-    chown -R maxscaleuser:maxscaleuser /etc/maxscale.cnf /var/lib/maxscale /var/run/maxscale
-
-# Copy config and entrypoint
-COPY maxscale.cnf /etc/
-COPY docker-entrypoint.sh /usr/local/bin/
-RUN chmod +x /usr/local/bin/docker-entrypoint.sh && \
-    ln -s /usr/local/bin/docker-entrypoint.sh /docker-entrypoint.sh
+    chown -R maxscaleuser:maxscaleuser /etc/maxscale.cnf /var/run/maxscale
 
 USER maxscaleuser
 
-ENTRYPOINT ["docker-entrypoint.sh"]
-CMD ["maxscale", "-d", "-U", "maxscale", "-l", "stdout"]
+# Start MaxScale
+ENTRYPOINT ["maxscale", "-d", "-U", "maxscale", "-l", "stdout"]
 
