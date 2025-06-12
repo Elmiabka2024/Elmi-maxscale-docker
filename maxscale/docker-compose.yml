@@ -1,6 +1,7 @@
 version: '2'
 services:
   shard1:
+    container_name: shard1
     image: mariadb:10.3
     environment:
       MYSQL_ROOT_PASSWORD: root
@@ -10,6 +11,7 @@ services:
       - "4001:3306"
 
   shard2:
+    container_name: shard2
     image: mariadb:10.3
     environment:
       MYSQL_ROOT_PASSWORD: root
@@ -19,6 +21,7 @@ services:
       - "4002:3306"
 
   maxscale:
+    container_name: maxscale
     image: mariadb/maxscale:latest
     depends_on:
       - shard1
