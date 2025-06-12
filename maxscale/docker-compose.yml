@@ -1,42 +1,30 @@
-version: '3.8'
-
+version: '2'
 services:
   shard1:
-    image: mariadb:10.6
-    container_name: shard1
+    image: mariadb:10.3
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: zipcodes
-      MYSQL_USER: maxuser
-      MYSQL_PASSWORD: maxpwd
     volumes:
-      - ./shard1.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./sql/shard1:/docker-entrypoint-initdb.d
     ports:
       - "4001:3306"
 
   shard2:
-    image: mariadb:10.6
-    container_name: shard2
+    image: mariadb:10.3
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: zipcodes
-      MYSQL_USER: maxuser
-      MYSQL_PASSWORD: maxpwd
     volumes:
-      - ./shard2.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./sql/shard2:/docker-entrypoint-initdb.d
     ports:
       - "4002:3306"
 
   maxscale:
-    build:
-      context: ./maxscale
-      dockerfile: Dockerfile
-    container_name: maxscale
+    image: mariadb/maxscale:2.4.7
     depends_on:
       - shard1
       - shard2
-    ports:
-      - "4006:4006"  # Listener port for MyService
     volumes:
-      - ./example.cnf:/etc/maxscale.cnf
+      - ./maxscale.cnf:/etc/maxscale.cnf
+    ports:
+      - "4006:4006"  # Sharding port (service listener)
 
