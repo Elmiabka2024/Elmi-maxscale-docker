@@ -4,7 +4,7 @@ services:
     container_name: shard1
     image: mariadb:10.3
     environment:
-      MYSQL_ROOT_PASSWORD: 'y'
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
     volumes:
       - ./sql/shard1:/docker-entrypoint-initdb.d
     ports:
@@ -14,7 +14,7 @@ services:
     container_name: shard2
     image: mariadb:10.3
     environment:
-      MYSQL_ROOT_PASSWORD: 'y'
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
     volumes:
       - ./sql/shard2:/docker-entrypoint-initdb.d
     ports:
@@ -29,5 +29,5 @@ services:
     volumes:
       - ./maxscale.cnf:/etc/maxscale.cnf
     ports:
-      - "4006:4006"  # Sharding port (service listener)
+      - "4006:4006"
 
