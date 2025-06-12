@@ -11,8 +11,7 @@ from mysql.connector import Error
 config = {
     'host': 'localhost',
     'port': 4006,
-    'user': 'maxuser',
-    'password': 'maxpwd',
+    'user': 'root',
     'database': 'zipcodes_one'
 }
 
