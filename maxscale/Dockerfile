@@ -1,4 +1,3 @@
-# Dockerfile for the 2.4 GA version of MariaDB MaxScale
 FROM ubuntu:bionic
 
 ARG VERSION
@@ -6,6 +5,7 @@ ARG GIT_COMMIT
 ARG GIT_TREE_STATE
 ARG BUILD_TIME
 
+# Add MaxScale APT repository
 COPY maxscale.list /etc/apt/sources.list.d/maxscale.list.tmp
 
 RUN apt-get -y update && \
@@ -19,10 +19,16 @@ RUN apt-get -y update && \
       printf "Version:    %s\nGit commit: %s%s\nBuilt:      %s\n" "$VERSION" "$GIT_COMMIT" "$GIT_TREE_STATE" "$BUILD_TIME" > /opt/image_details; \
     fi
 
-# Create non-root user and fix permissions
+# Create non-root user and set permissions
 RUN useradd -ms /bin/bash maxscaleuser && \
     mkdir -p /var/run/maxscale && \
-    chown -R maxscaleuser:maxscaleuser /etc/maxscale.cnf /var/lib/maxscale /var/log/maxscale /var/run/maxscale || true
+    chown -R maxscaleuser:maxscaleuser /etc/maxscale.cnf /var/lib/maxscale /var/run/maxscale
+
+# Copy config and entrypoint
+COPY maxscale.cnf /etc/
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh && \
+    ln -s /usr/local/bin/docker-entrypoint.sh /docker-entrypoint.sh
 
 USER maxscaleuser
 
