@@ -8,7 +8,6 @@
 import mysql.connector
 from mysql.connector import Error
 
-# Simple connection config
 config = {
     'host': 'localhost',
     'port': 4006,
@@ -18,37 +17,36 @@ config = {
 }
 
 try:
-    connection = mysql.connector.connect(**config)
+    conn = mysql.connector.connect(**config)
 
-    if connection.is_connected():
-        cursor = connection.cursor()
+    if conn.is_connected():
+        cur = conn.cursor()
 
-        print("📌 Largest zipcode in zipcodes_one table:")
-        cursor.execute("SELECT * FROM zipcodes_one ORDER BY zipcode DESC LIMIT 1")
-        for row in cursor.fetchall():
+        print("Largest zipcode:")
+        cur.execute("SELECT * FROM zipcodes_one ORDER BY zipcode DESC LIMIT 1")
+        for row in cur.fetchall():
             print(row)
 
-        print("\n📌 All zipcodes where state = 'KY':")
-        cursor.execute("SELECT * FROM zipcodes_one WHERE state = 'KY'")
-        for row in cursor.fetchall():
+        print("\nZipcodes in KY:")
+        cur.execute("SELECT * FROM zipcodes_one WHERE state = 'KY'")
+        for row in cur.fetchall():
             print(row)
 
-        print("\n📌 All zipcodes between 40000 and 41000:")
-        cursor.execute("SELECT * FROM zipcodes_one WHERE zipcode BETWEEN 40000 AND 41000")
-        for row in cursor.fetchall():
+        print("\nZipcodes between 40000 and 41000:")
+        cur.execute("SELECT * FROM zipcodes_one WHERE zipcode BETWEEN 40000 AND 41000")
+        for row in cur.fetchall():
             print(row)
 
-        print("\n📌 TotalWages where state = 'PA':")
-        cursor.execute("SELECT TotalWages FROM zipcodes_one WHERE state = 'PA'")
-        for row in cursor.fetchall():
+        print("\nTotalWages for PA:")
+        cur.execute("SELECT TotalWages FROM zipcodes_one WHERE state = 'PA'")
+        for row in cur.fetchall():
             print(row)
 
 except Error as e:
-    print(f"❌ Error: {e}")
+    print("Error:", e)
 
 finally:
-    if 'connection' in locals() and connection.is_connected():
-        cursor.close()
-        connection.close()
-        print("\n✅ Connection closed.")
-
+    if 'conn' in locals() and conn.is_connected():
+        cur.close()
+        conn.close()
+        print("\nConnection closed.")
