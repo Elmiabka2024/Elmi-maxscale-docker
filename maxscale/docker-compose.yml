@@ -1,28 +1,28 @@
 #version: '2'
 services:
   shard1:
-    container_name: shard1
     image: mariadb:10.3
+    container_name: shard1
     environment:
       MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
     volumes:
-      - ./sql/shard1:/docker-entrypoint-initdb.d
+      - ./init:/docker-entrypoint-initdb.d
     ports:
       - "4001:3306"
 
   shard2:
-    container_name: shard2
     image: mariadb:10.3
+    container_name: shard2
     environment:
       MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
     volumes:
-      - ./sql/shard2:/docker-entrypoint-initdb.d
+      - ./init:/docker-entrypoint-initdb.d
     ports:
       - "4002:3306"
 
   maxscale:
-    container_name: maxscale
     image: mariadb/maxscale:latest
+    container_name: maxscale
     depends_on:
       - shard1
       - shard2
