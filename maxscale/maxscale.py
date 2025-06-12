@@ -14,7 +14,7 @@ config = {
     'port': 4006,
     'user': 'maxuser',
     'password': 'maxpwd',
-    'database': 'zipcodes'
+    'database': 'zipcodes_one'
 }
 
 try:
@@ -23,23 +23,23 @@ try:
     if connection.is_connected():
         cursor = connection.cursor()
 
-        print("📌 Largest zipcode in zipcodes table:")
-        cursor.execute("SELECT * FROM zipcodes ORDER BY zipcode DESC LIMIT 1")
+        print("📌 Largest zipcode in zipcodes_one table:")
+        cursor.execute("SELECT * FROM zipcodes_one ORDER BY zipcode DESC LIMIT 1")
         for row in cursor.fetchall():
             print(row)
 
         print("\n📌 All zipcodes where state = 'KY':")
-        cursor.execute("SELECT * FROM zipcodes WHERE state = 'KY'")
+        cursor.execute("SELECT * FROM zipcodes_one WHERE state = 'KY'")
         for row in cursor.fetchall():
             print(row)
 
         print("\n📌 All zipcodes between 40000 and 41000:")
-        cursor.execute("SELECT * FROM zipcodes WHERE zipcode BETWEEN 40000 AND 41000")
+        cursor.execute("SELECT * FROM zipcodes_one WHERE zipcode BETWEEN 40000 AND 41000")
         for row in cursor.fetchall():
             print(row)
 
         print("\n📌 TotalWages where state = 'PA':")
-        cursor.execute("SELECT TotalWages FROM zipcodes WHERE state = 'PA'")
+        cursor.execute("SELECT TotalWages FROM zipcodes_one WHERE state = 'PA'")
         for row in cursor.fetchall():
             print(row)
 
