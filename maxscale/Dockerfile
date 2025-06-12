@@ -19,11 +19,16 @@ RUN apt-get -y update && \
       printf "Version:    %s\nGit commit: %s%s\nBuilt:      %s\n" "$VERSION" "$GIT_COMMIT" "$GIT_TREE_STATE" "$BUILD_TIME" > /opt/image_details; \
     fi
 
+# Create non-root user and change ownership
+RUN useradd -ms /bin/bash maxscaleuser && \
+    chown -R maxscaleuser:maxscaleuser /etc/maxscale.cnf /var/lib/maxscale /var/log/maxscale || true
+
 COPY maxscale.cnf /etc/
 COPY docker-entrypoint.sh /usr/local/bin/
-
 RUN chmod 755 /usr/local/bin/docker-entrypoint.sh && \
-    ln -s /usr/local/bin/docker-entrypoint.sh /docker-entrypoint.sh # backwards compat
+    ln -s /usr/local/bin/docker-entrypoint.sh /docker-entrypoint.sh
+
+USER maxscaleuser
 
 ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["maxscale", "-d", "-U", "maxscale", "-l", "stdout"]
