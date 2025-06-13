@@ -20,13 +20,14 @@ services:
     ports:
       - "4002:3306"
 
-  maxscale:
+   maxscale:
     image: mariadb/maxscale:latest
     container_name: maxscale
     depends_on:
       - shard1
       - shard2
     volumes:
-      - ./example.cnf:/etc/maxscale.cnf
+      - ./maxscale/maxscale.cnf.d/example.cnf:/etc/maxscale.cnf.d/example.cnf
     ports:
       - "4006:4006"
+
