@@ -1,3 +1,7 @@
+[maxscale]
+threads=8
+
+
 [shard1]
 type=server
 address=10.0.2.15

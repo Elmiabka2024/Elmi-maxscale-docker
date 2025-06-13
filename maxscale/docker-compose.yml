@@ -1,12 +1,12 @@
-#version: '2'
+version: '2'
 services:
   shard1:
     image: mariadb:10.3
     container_name: shard1
     environment:
-      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      MYSQL_ROOT_PASSWORD: maxpwd
     volumes:
-      - ./init:/docker-entrypoint-initdb.d
+      - ./maxscale/init/shard1_init:/docker-entrypoint-initdb.d
     ports:
       - "4001:3306"
 
@@ -14,9 +14,9 @@ services:
     image: mariadb:10.3
     container_name: shard2
     environment:
-      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      MYSQL_ROOT_PASSWORD: maxpwd
     volumes:
-      - ./init:/docker-entrypoint-initdb.d
+      - ./maxscale/init/shard2_init:/docker-entrypoint-initdb.d
     ports:
       - "4002:3306"
 
@@ -27,7 +27,6 @@ services:
       - shard1
       - shard2
     volumes:
-      - ./maxscale.cnf:/etc/maxscale.cnf
+      - ./example.cnf:/etc/maxscale.cnf
     ports:
       - "4006:4006"
-
