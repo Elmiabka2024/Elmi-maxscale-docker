@@ -30,7 +30,6 @@ services:
     volumes:
       - ./maxscale/maxscale.cnf.d:/etc/maxscale.cnf.d
     ports:
-      - "4006:4006"  # Sharded SQL service
-      - "6603:6603"   # <--- expose admin port
-    
+      - "4006:4006"
+      - "6603:6603"
 
