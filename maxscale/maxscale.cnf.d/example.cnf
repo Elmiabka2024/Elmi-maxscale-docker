@@ -5,13 +5,11 @@ threads=8
 type=server
 address=shard1
 port=3306
-protocol=MariaDBBackend
 
 [shard2]
 type=server
 address=shard2
 port=3306
-protocol=MariaDBBackend
 
 [sharded-Service]
 type=service
@@ -23,7 +21,7 @@ password=maxpwd
 [sharded-Listener]
 type=listener
 service=sharded-Service
-protocol=MySQLClient
+protocol=MariaDBClient
 port=4006
 
 [MySQLMonitor]
