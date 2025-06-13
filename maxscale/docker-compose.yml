@@ -31,6 +31,6 @@ services:
       - ./maxscale/maxscale.cnf.d:/etc/maxscale.cnf.d
     ports:
       - "4006:4006"  # Sharded SQL service
-      - "8989:8989"  # Admin REST API
+      - "6603:6603"   # <--- expose admin port
     
 
