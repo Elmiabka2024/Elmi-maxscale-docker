@@ -7,7 +7,7 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: maxpwd
     volumes:
-      - ./init/shard1.sql:/docker-entrypoint-initdb.d/shard1.sql
+      - ./init/shard1:/docker-entrypoint-initdb.d
     ports:
       - "4001:3306"
 
@@ -17,18 +17,17 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: maxpwd
     volumes:
-      - ./init/shard2.sql:/docker-entrypoint-initdb.d/shard2.sql
+      - ./init/shard2:/docker-entrypoint-initdb.d
     ports:
       - "4002:3306"
 
   maxscale:
-    image: mariadb/maxscale:latest
+    image: mariadb/maxscale:2.4.7
     container_name: maxscale
     depends_on:
       - shard1
       - shard2
     volumes:
-      - ./maxscale/maxscale.cnf.d/example.cnf:/etc/maxscale.cnf.d/example.cnf
+      - ./maxscale/maxscale.cnf.d:/etc/maxscale.cnf.d
     ports:
       - "4006:4006"
-
