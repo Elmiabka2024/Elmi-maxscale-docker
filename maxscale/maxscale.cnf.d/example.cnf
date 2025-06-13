@@ -4,13 +4,13 @@ threads=8
 
 [shard1]
 type=server
-address=10.0.2.15
+address=shard1
 port=3306
 
 
 [shard2]
 type=server
-address=10.0.2.15
+address=shard2
 port=3306
 
 
