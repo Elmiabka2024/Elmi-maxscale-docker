@@ -22,7 +22,7 @@ services:
       - "4002:3306"
 
   maxscale:
-    build: .
+    build: ./maxscale
     container_name: maxscale
     depends_on:
       - shard1
