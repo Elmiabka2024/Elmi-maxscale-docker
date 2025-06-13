@@ -1,90 +1,112 @@
-# MariaDB MaxScale Docker image
+# MariaDB MaxScale Sharded Database with Docker
 
-This Docker image runs the latest 2.4 version of MariaDB MaxScale.
+## Introduction
 
--	[Travis CI:  
-	![build status badge](https://img.shields.io/travis/mariadb-corporation/maxscale-docker/master.svg)](https://travis-ci.org/mariadb-corporation/maxscale-docker/branches)
+This project sets up a basic MariaDB sharded environment using MaxScale and Docker. It includes two MariaDB containers (`shard1` and `shard2`) each with their own database (`zipcodes_one` and `zipcodes_two`), and a MaxScale container for query routing.
+
+This setup is ideal for assignment requirement  and  local testing use cases, as authentication has been disabled (passwordless root user).
+
+---
 
 ## Running
-[The MaxScale docker-compose setup](./docker-compose.yml) contains MaxScale
-configured with a three node master-slave cluster. To start it, run the
-following commands in this directory.
 
-```
-docker-compose build
-docker-compose up -d
-```
+To start the project: clone the repo
 
-After MaxScale and the servers have started (takes a few minutes), you can find
-the readwritesplit router on port 4006 and the readconnroute on port 4008. The
-user `maxuser` with the password `maxpwd` can be used to test the cluster.
-Assuming the mariadb client is installed on the host machine:
-```
-$ mysql -umaxuser -pmaxpwd -h 127.0.0.1 -P 4006 test
-Welcome to the MariaDB monitor.  Commands end with ; or \g.
-Your MySQL connection id is 5
-Server version: 10.2.12 2.2.9-maxscale mariadb.org binary distribution
-
-Copyright (c) 2000, 2018, Oracle, MariaDB Corporation Ab and others.
-
-Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
-
-MySQL [test]>
-```
-You can edit the [`maxscale.cnf.d/example.cnf`](./maxscale.cnf.d/example.cnf)
-file and recreate the MaxScale container to change the configuration.
-
-To stop the containers, execute the following command. Optionally, use the -v
-flag to also remove the volumes.
-
-To run maxctrl in the container to see the status of the cluster:
-```
-$ docker-compose exec maxscale maxctrl list servers
-┌─────────┬─────────┬──────┬─────────────┬─────────────────┬──────────┐
-│ Server  │ Address │ Port │ Connections │ State           │ GTID     │
-├─────────┼─────────┼──────┼─────────────┼─────────────────┼──────────┤
-│ server1 │ master  │ 3306 │ 0           │ Master, Running │ 0-3000-5 │
-├─────────┼─────────┼──────┼─────────────┼─────────────────┼──────────┤
-│ server2 │ slave1  │ 3306 │ 0           │ Slave, Running  │ 0-3000-5 │
-├─────────┼─────────┼──────┼─────────────┼─────────────────┼──────────┤
-│ server3 │ slave2  │ 3306 │ 0           │ Running         │ 0-3000-5 │
-└─────────┴─────────┴──────┴─────────────┴─────────────────┴──────────┘
-
+```bash
+git clone git@github.com:Elmiabka2024/elmi-maxscale-docker.git
+cd elmi-maxscale-docker
 ```
 
-The cluster is configured to utilize automatic failover. To illustrate this you can stop the master
-container and watch for maxscale to failover to one of the original slaves and then show it rejoining
-after recovery:
 ```
-$ docker-compose stop master
-Stopping maxscaledocker_master_1 ... done
-$ docker-compose exec maxscale maxctrl list servers
-┌─────────┬─────────┬──────┬─────────────┬─────────────────┬─────────────┐
-│ Server  │ Address │ Port │ Connections │ State           │ GTID        │
-├─────────┼─────────┼──────┼─────────────┼─────────────────┼─────────────┤
-│ server1 │ master  │ 3306 │ 0           │ Down            │ 0-3000-5    │
-├─────────┼─────────┼──────┼─────────────┼─────────────────┼─────────────┤
-│ server2 │ slave1  │ 3306 │ 0           │ Master, Running │ 0-3001-7127 │
-├─────────┼─────────┼──────┼─────────────┼─────────────────┼─────────────┤
-│ server3 │ slave2  │ 3306 │ 0           │ Slave, Running  │ 0-3001-7127 │
-└─────────┴─────────┴──────┴─────────────┴─────────────────┴─────────────┘
-$ docker-compose start master
-Starting master ... done
-$ docker-compose exec maxscale maxctrl list servers
-┌─────────┬─────────┬──────┬─────────────┬─────────────────┬─────────────┐
-│ Server  │ Address │ Port │ Connections │ State           │ GTID        │
-├─────────┼─────────┼──────┼─────────────┼─────────────────┼─────────────┤
-│ server1 │ master  │ 3306 │ 0           │ Slave, Running  │ 0-3001-7127 │
-├─────────┼─────────┼──────┼─────────────┼─────────────────┼─────────────┤
-│ server2 │ slave1  │ 3306 │ 0           │ Master, Running │ 0-3001-7127 │
-├─────────┼─────────┼──────┼─────────────┼─────────────────┼─────────────┤
-│ server3 │ slave2  │ 3306 │ 0           │ Slave, Running  │ 0-3001-7127 │
-└─────────┴─────────┴──────┴─────────────┴─────────────────┴─────────────┘
+sudo docker compose up build
+ sudo docker compose up -d
+```
+once the containers are running verify with
+```
+sudo docker ps
+```
+stop and clean upl the environment 
+```
+sudo compose down
+```
+
+remove volumes
+
+```
+sudo docker compose down v
+```
+
+## Configuration
+
+### Databases
+shard1.sql 
+ contains the zipcodes_one database
+
+shard2.sql
+
+contains the zipcodes_two database
+
+### Authentication
+No password is used only root user
+
+### Maxscale 
+routes queries through the readwritesplit router
+
+### ports
+shard1: host port 4001 and container port 3306
+shard2: host port 4002 and container port 3306
+maxscale: exposes listener on port 4006
+
+## MaxScale docker-compose.yml set up
+
+```
+version: '2'
+
+services:
+  shard1:
+    image: mariadb:10.3
+    container_name: shard1
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+    volumes:
+      - ./init:/docker-entrypoint-initdb.d
+    ports:
+      - "4001:3306"
+
+  shard2:
+    image: mariadb:10.3
+    container_name: shard2
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+    volumes:
+      - ./init:/docker-entrypoint-initdb.d
+    ports:
+      - "4002:3306"
+
+  maxscale:
+    image: mariadb/maxscale:2.4.7
+    container_name: maxscale
+    depends_on:
+      - shard1
+      - shard2
+    volumes:
+      - ./maxscale.cnf:/etc/maxscale.cnf
+    ports:
+      - "4006:4006"
+```
+
+### connecting to databases
+
+connect to shard1 
+```
+sudo docker exec -it shard1 mysql -u root
+```
+connect to shard2
+
+```
+sudo docker exec -it shard2 mysql -u root
 
 ```
 
-Once complete, to remove the cluster and maxscale containers:
 
-```
-docker-compose down -v
-```
+
