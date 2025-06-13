@@ -22,7 +22,7 @@ services:
       - "4002:3306"
 
   maxscale:
-    build: ./maxscale
+    image: mariadb/maxscale:2.4.7
     container_name: maxscale
     depends_on:
       - shard1
@@ -31,4 +31,5 @@ services:
       - ./maxscale/maxscale.cnf.d:/etc/maxscale.cnf.d
     ports:
       - "4006:4006"
+    command: ["maxscale", "--config", "/etc/maxscale.cnf.d/example.cnf"]
 
