@@ -1,4 +1,4 @@
-version: '2'
+#version: '2'
 
 services:
   shard1:
@@ -22,7 +22,7 @@ services:
       - "4002:3306"
 
   maxscale:
-    image: mariadb/maxscale:latest
+    build: .
     container_name: maxscale
     depends_on:
       - shard1
@@ -31,3 +31,4 @@ services:
       - ./maxscale/maxscale.cnf.d:/etc/maxscale.cnf.d
     ports:
       - "4006:4006"
+
