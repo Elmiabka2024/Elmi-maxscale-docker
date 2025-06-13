@@ -1,3 +1,6 @@
+[maxscale]
+threads=8
+
 [shard1]
 type=server
 address=shard1
