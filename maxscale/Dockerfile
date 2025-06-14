@@ -3,7 +3,7 @@ FROM ubuntu:bionic
 # Add MariaDB MaxScale APT repo
 COPY maxscale.list /etc/apt/sources.list.d/maxscale.list
 
-# Install MaxScale and dependencies
+# Install MaxScale and dependencies including pgrep (procps)
 RUN apt-get update && \
     apt-get install -y gnupg2 ca-certificates procps && \
     apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys 0x135659e928c12247 && \
