@@ -22,7 +22,7 @@ services:
       - "4002:3306"
 
   maxscale:
-    image: mariadb/maxscale:latest
+    image: mariadb/maxscale:2.4.7
     container_name: maxscale
     depends_on:
       - shard1
