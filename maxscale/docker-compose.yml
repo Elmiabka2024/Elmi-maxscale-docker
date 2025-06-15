@@ -1,6 +1,3 @@
-#version: '2'
-
-
 services:
   shard1:
     image: mariadb:10.3
