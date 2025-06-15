@@ -1,0 +1,2 @@
+CREATE USER IF NOT EXISTS 'maxuser'@'%' IDENTIFIED BY 'maxpwd';
+GRANT ALL ON *.* TO 'maxuser'@'%' WITH GRANT OPTION;
