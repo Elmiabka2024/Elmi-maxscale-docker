@@ -15,7 +15,7 @@ port=3306
 type=service
 router=schemarouter
 servers=shard1,shard2
-user=maxuser
+user=root
 password=maxpwd
 
 [sharded-Listener]
@@ -24,11 +24,23 @@ service=sharded-Service
 protocol=MariaDBClient
 port=4006
 
+[maxctrl-service]
+type=service
+router=cli
+listener=admin_listener
+
+[admin_listener]
+type=listener
+service=maxctrl-service
+protocol=maxscaled
+address=0.0.0.0
+port=6603
+
 [MySQLMonitor]
 type=monitor
 module=mariadbmon
 servers=shard1,shard2
-user=maxuser
+user=root
 password=maxpwd
 monitor_interval=10000
 

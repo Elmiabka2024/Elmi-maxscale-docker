@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   shard1:
     image: mariadb:10.3
@@ -30,5 +32,6 @@ services:
     volumes:
       - ./maxscale/maxscale.cnf.d:/etc/maxscale.cnf.d
     ports:
-      - "4006:4006"
+      - "4006:4006"   # MaxScale schemarouter port
+      - "6603:6603"   # MaxScale admin (maxctrl) port
 
