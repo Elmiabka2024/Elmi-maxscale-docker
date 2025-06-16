@@ -5,11 +5,13 @@ threads=8
 type=server
 address=shard1
 port=3306
+protocol=MariaDBBackend
 
 [shard2]
 type=server
 address=shard2
 port=3306
+protocol=MariaDBBackend
 
 [sharded-Service]
 type=service
@@ -35,7 +37,6 @@ monitor_interval=10000
 [maxctrl-service]
 type=service
 router=cli
-listener=admin_listener
 
 [admin_listener]
 type=listener
