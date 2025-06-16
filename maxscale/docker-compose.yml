@@ -1,43 +1,36 @@
 #version: '3.8'
-
 services:
+  shard1:
+    image: mariadb:10.3
+    container_name: shard1
+    environment:
+      MYSQL_ROOT_PASSWORD: maxpwd
+    volumes:
+      - ./init/shard1.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./init/user.sql:/docker-entrypoint-initdb.d/z_init_user.sql
+    ports:
+      - "4001:3306"
+
+  shard2:
+    image: mariadb:10.3
+    container_name: shard2
+    environment:
+      MYSQL_ROOT_PASSWORD: maxpwd
+    volumes:
+      - ./init/shard2.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./init/user.sql:/docker-entrypoint-initdb.d/z_init_user.sql
+    ports:
+      - "4002:3306"
+
   maxscale:
     image: mariadb/maxscale:latest
     container_name: maxscale
-    ports:
-      - "4006:4006"
-      - "6603:6603"
-    volumes:
-      - ./maxscale/maxscale.cnf.d:/etc/maxscale.cnf.d
     depends_on:
       - shard1
       - shard2
-
-  shard1:
-    image: mariadb:latest
-    container_name: shard1
-    environment:
-      MYSQL_ROOT_PASSWORD: rootpwd
-      MYSQL_DATABASE: testdb
-      MYSQL_USER: maxuser
-      MYSQL_PASSWORD: maxpwd
     volumes:
-      - ./maxscale/init/shard1:/var/lib/mysql
-      - ./maxscale/init/shard1.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./maxscale.cnf.d:/etc/maxscale.cnf.d
     ports:
-      - "3307:3306"
-
-  shard2:
-    image: mariadb:latest
-    container_name: shard2
-    environment:
-      MYSQL_ROOT_PASSWORD: rootpwd
-      MYSQL_DATABASE: testdb
-      MYSQL_USER: maxuser
-      MYSQL_PASSWORD: maxpwd
-    volumes:
-      - ./maxscale/init/shard2:/var/lib/mysql
-      - ./maxscale/init/shard2.sql:/docker-entrypoint-initdb.d/init.sql
-    ports:
-      - "3308:3306"
+      - "4006:4006"   # MaxScale schemarouter port
+      - "6603:6603"   # MaxScale admin port
 
