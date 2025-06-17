@@ -2,12 +2,17 @@
 
 ## Introduction
 
-This project sets up a basic MariaDB sharded environment using MaxScale and Docker. It includes two MariaDB containers (`shard1` and `shard2`) each with their own database (`zipcodes_one` and `zipcodes_two`), and a MaxScale container for query routing.
+This project sets up a basic MariaDB sharded environment using MaxScale and Docker. It includes:
 
-This setup is ideal for assignment requirement  and  local testing.
+Two MariaDB containers (shard1 and shard2), each hosting:
 
-To start the project: clone the repo
+zipcodes_one (on shard1)
 
+zipcodes_two (on shard2)
+One MaxScale container to route client queries based on the schema.
+
+
+## Getting Start
 ```bash
 git clone git@github.com:Elmiabka2024/elmi-maxscale-docker.git
 cd elmi-maxscale-docker
@@ -50,9 +55,11 @@ sudo docker compose down v
 
 MaxScale Setup
 MaxScale is configured via a mounted config file located at:
+
+
+```./maxscale/maxscale.cnf.d/example.cnf
 ```
-./maxscale/maxscale.cnf.d/example.cnf
-```
+
 Key configuration components:
 
 Shard1 and Shard2: Two MariaDB instances (masters) for sharding
@@ -85,24 +92,12 @@ MaxScale to connect to the shards
 
 The Python client to connect to MaxScale
 
-### Maxscale 
-MaxScale is configured to route queries using the schemarouter module.
-This means:
-
-It routes queries based on the schema (database) name
-
-You query via a single port (4006), and MaxScale decides which backend (shard) to send it to, depending on the
-```
- USE zipcodes_one
-````
-```
-  USE zipcodes_two
-```
- statement in your queries.
 ### ports
 shard1: host port 4001 and container port 3306
 shard2: host port 4002 and container port 3306
 maxscale: exposes listener on port 4006
+
+## Connecting to containers
 
 
 connect to shard1 
@@ -115,14 +110,33 @@ connect to shard2
 sudo docker exec -it shard2 mysql -u root
 
 ```
+### Connect to MaxScale
 
-Once connected, choose the shard database:
+MaxScale is configured to route queries using the schemarouter module.
+This means:
+
+It routes queries based on the schema (database) name
+
+You query via a single port (4006), and MaxScale decides which backend (shard)
+
+ 
+from your local terminal run:
+```
+mysql -h 127.0.0.1 -P 4006 -u maxuser -p
+```
+Enter```maxpwd```
+ when prompted for password 
+
+Once connected, run queries like:
 ```
 USE zipcodes_one;
 SELECT * FROM zipcodes_one WHERE State = 'KY';
 ```
 
-To check for servers run:
+## To check for servers status:
+
+To inspect the health and status of the backend shards:
+
 ```
 sudo docker compose exec maxscale maxctrl list servers```
 
