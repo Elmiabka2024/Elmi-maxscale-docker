@@ -7,8 +7,8 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: maxpwd
     volumes:
-      - ./sql/shard1.sql:/docker-entrypoint-initdb.d/init.sql:ro
-      - ./init/user.sql:/docker-entrypoint-initdb.d/user.sql:ro
+      - ./sql/shard1.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./init/user.sql:/docker-entrypoint-initdb.d/user.sql
     ports:
       - "4001:3306"
     command: --server-id=1
@@ -19,8 +19,8 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: maxpwd
     volumes:
-      - ./sql/shard2.sql:/docker-entrypoint-initdb.d/init.sql:ro
-      - ./init/user.sql:/docker-entrypoint-initdb.d/user.sql:ro
+      - ./sql/shard2.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./init/user.sql:/docker-entrypoint-initdb.d/user.sql
     ports:
       - "4002:3306"
     command: --server-id=2
