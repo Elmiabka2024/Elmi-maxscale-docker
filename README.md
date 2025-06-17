@@ -6,9 +6,6 @@ This project sets up a basic MariaDB sharded environment using MaxScale and Dock
 
 This setup is ideal for assignment requirement  and  local testing use cases, as authentication has been disabled (passwordless root user).
 
----
-
-## Running
 
 To start the project: clone the repo
 
@@ -17,15 +14,27 @@ git clone git@github.com:Elmiabka2024/elmi-maxscale-docker.git
 cd elmi-maxscale-docker
 ```
 
+---
+
+##Building
+build the image to start up
 ```
 sudo docker compose up build
  sudo docker compose up -d
 ```
-once the containers are running verify with
+
+## Running
+Make sure you are in the root project directory where your configuration files and SQL data files are located
+ ```
+docker-compose.yml
+maxscale.cnf.d/example.cnf
+```
+
+check running containers
 ```
 sudo docker ps
 ```
-stop and clean upl the environment 
+stop and clean up the environment
 ```
 sudo compose down
 ```
@@ -38,6 +47,20 @@ sudo docker compose down v
 
 ## Configuration
 
+MaxScale Setup
+MaxScale is configured via a mounted config file located at:
+```
+./maxscale/maxscale.cnf.d/example.cnf
+```
+Key configuration components:
+
+Shard1 and Shard2: Two MariaDB instances (masters) for sharding
+
+Router: schemarouter — routes queries based on database name
+
+Monitor: mariadbmon for basic health checking (auto-failover disabled)
+
+Listener: Listens on port 4006
 ### Databases
 shard1.sql 
  contains the zipcodes_one database
@@ -47,55 +70,39 @@ shard2.sql
 contains the zipcodes_two database
 
 ### Authentication
-No password is used only root user
+MaxScale and the shards use the following credentials (defined in user.sql and used in MaxScale config):
+
+Username:
+``` maxuser```
+
+Password:
+```maxpwd```
+
+These credentials are used by:
+
+MaxScale to connect to the shards
+
+The Python client to connect to MaxScale
 
 ### Maxscale 
-routes queries through the readwritesplit router
+MaxScale is configured to route queries using the schemarouter module.
+This means:
 
+It routes queries based on the schema (database) name
+
+You query via a single port (4006), and MaxScale decides which backend (shard) to send it to, depending on the
+```
+ USE zipcodes_one
+````
+```
+  USE zipcodes_two
+```
+ statement in your queries.
 ### ports
 shard1: host port 4001 and container port 3306
 shard2: host port 4002 and container port 3306
 maxscale: exposes listener on port 4006
 
-## MaxScale docker-compose.yml set up
-
-```
-version: '2'
-
-services:
-  shard1:
-    image: mariadb:10.3
-    container_name: shard1
-    environment:
-      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
-    volumes:
-      - ./init:/docker-entrypoint-initdb.d
-    ports:
-      - "4001:3306"
-
-  shard2:
-    image: mariadb:10.3
-    container_name: shard2
-    environment:
-      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
-    volumes:
-      - ./init:/docker-entrypoint-initdb.d
-    ports:
-      - "4002:3306"
-
-  maxscale:
-    image: mariadb/maxscale:2.4.7
-    container_name: maxscale
-    depends_on:
-      - shard1
-      - shard2
-    volumes:
-      - ./maxscale.cnf:/etc/maxscale.cnf
-    ports:
-      - "4006:4006"
-```
-
-### connecting to databases
 
 connect to shard1 
 ```
@@ -108,5 +115,21 @@ sudo docker exec -it shard2 mysql -u root
 
 ```
 
+Once connected, choose the shard database:
+```
+USE zipcodes_one;
+SELECT * FROM zipcodes_one WHERE State = 'KY';
+```
 
+To check for servers run:
+```
+sudo docker compose exec maxscale maxctrl list servers```
+
+┌────────┬─────────┬──────┬─────────────┬─────────────────┬──────┐
+│ Server │ Address │ Port │ Connections │ State           │ GTID │
+├────────┼─────────┼──────┼─────────────┼─────────────────┼──────┤
+│ shard1 │ shard1  │ 3306 │ 0           │ Master, Running │      │
+├────────┼─────────┼──────┼─────────────┼─────────────────┼──────┤
+│ shard2 │ shard2  │ 3306 │ 0           │ Running         │      │
+└────────┴─────────┴──────┴─────────────┴─────────────────┴──────┘
 
