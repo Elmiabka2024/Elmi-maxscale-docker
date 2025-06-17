@@ -4,8 +4,7 @@
 
 This project sets up a basic MariaDB sharded environment using MaxScale and Docker. It includes two MariaDB containers (`shard1` and `shard2`) each with their own database (`zipcodes_one` and `zipcodes_two`), and a MaxScale container for query routing.
 
-This setup is ideal for assignment requirement  and  local testing use cases, as authentication has been disabled (passwordless root user).
-
+This setup is ideal for assignment requirement  and  local testing.
 
 To start the project: clone the repo
 
@@ -16,7 +15,9 @@ cd elmi-maxscale-docker
 
 ---
 
-##Building
+## Building
+
+```
 build the image to start up
 ```
 sudo docker compose up build
