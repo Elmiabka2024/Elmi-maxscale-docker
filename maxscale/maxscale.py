@@ -19,13 +19,14 @@ def run_query(cursor, query, description):
         print("No results found.")
 
 def main():
+    connection = None
     try:
         connection = mysql.connector.connect(
-            host='127.0.0.1',  # or your maxscale host IP
+            host='192.168.0.38',  # Use your real IP here
             port=4006,
             user='maxuser',
             password='maxpwd',
-            database='zipcodes_one'  # initial db, but with schemarouter this is fine
+            database='zipcodes_one'  # starting DB for schemarouter
         )
 
         if connection.is_connected():
@@ -43,7 +44,7 @@ def main():
             query3 = "SELECT zipcode FROM zipcodes_one WHERE zipcode BETWEEN 40000 AND 41000;"
             run_query(cursor, query3, "All zipcodes between 40000 and 41000:")
 
-            # 4. TotalWages column where state = PA
+            # 4. TotalWages column where state = PA (from zipcodes_two shard)
             query4 = "SELECT TotalWages FROM zipcodes_two WHERE state = 'PA';"
             run_query(cursor, query4, "TotalWages for state = PA:")
 
@@ -55,7 +56,7 @@ def main():
         print("Error while connecting or querying:", e)
 
     finally:
-        if connection.is_connected():
+        if connection and connection.is_connected():
             connection.close()
 
 if __name__ == "__main__":
