@@ -143,6 +143,27 @@ USE zipcodes_one;
 SELECT * FROM zipcodes_one WHERE State = 'KY';
 ```
 
+## Python Query Script
+
+To run the Python script that performs the 4 required queries:
+
+Make sure Python3 and mysql-connector-python are installed on your system.
+
+Install the connector (if needed):
+
+```
+pip3 install mysql-connector-python
+```
+This script will connect to MaxScale on port 4006 and run:
+
+1. The largest zipcode in zipcodes_one
+
+2. All zipcodes where state = KY
+
+3. All zipcodes between 40000 and 41000
+
+4. TotalWages where state = PA (might return "No results found" if not present)
+
 ## To check for servers status:
 
 To inspect the health and status of the backend shards:
