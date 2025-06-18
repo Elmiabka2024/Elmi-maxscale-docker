@@ -5,7 +5,7 @@
 # Description: Connects to MaxScale via schemarouter and performs queries on sharded MariaDB databases
 
 
-import mysql.connector
+import mysql.connector 
 from mysql.connector import Error
 
 def run_query(cursor, query, description):
@@ -45,7 +45,7 @@ def main():
             run_query(cursor, query3, "All zipcodes between 40000 and 41000:")
 
             # 4. TotalWages column where state = PA (from zipcodes_two shard)
-            query4 = "SELECT TotalWages FROM zipcodes_two WHERE state = 'PA';"
+            query4 = "SELECT TotalWages FROM zipcodes_two.zipcodes_two WHERE state = 'PA';"
             run_query(cursor, query4, "TotalWages for state = PA:")
 
             cursor.close()
