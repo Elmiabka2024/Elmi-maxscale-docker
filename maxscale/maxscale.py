@@ -6,56 +6,58 @@
 
 
 import mysql.connector
+from mysql.connector import Error
 
-def run_queries():
-    # Connect to MaxScale router using bridged IP and port 4006
-    db = mysql.connector.connect(
-        host="192.168.0.38",  # Your VM's bridged network IP address
-        port=4006,            # MaxScale port for schemarouter
-        user="maxuser",       # MaxScale user
-        password="maxpwd"     # Password for the user
-    )
-    cursor = db.cursor()
+def run_query(cursor, query, description):
+    print(f"\n{description}")
+    cursor.execute(query)
+    results = cursor.fetchall()
+    if results:
+        for row in results:
+            print(row)
+    else:
+        print("No results found.")
 
-    # Query 1: Find the largest zipcode in the first shard (zipcodes_one)
-    print("Largest zipcode in zipcodes_one:")
-    cursor.execute("SELECT Zipcode FROM zipcodes_one.zipcodes_one ORDER BY Zipcode DESC LIMIT 1;")
-    for row in cursor.fetchall():
-        print(row)
+def main():
+    try:
+        connection = mysql.connector.connect(
+            host='127.0.0.1',  # or your maxscale host IP
+            port=4006,
+            user='maxuser',
+            password='maxpwd',
+            database='zipcodes_one'  # initial db, but with schemarouter this is fine
+        )
 
-    # Query 2: Get all zipcodes where state = 'KY' from both shards
-    print("\nAll zipcodes where state = KY:")
-    cursor.execute("SELECT Zipcode FROM zipcodes_one.zipcodes_one WHERE State = 'KY';")
-    for row in cursor.fetchall():
-        print(row)
+        if connection.is_connected():
+            cursor = connection.cursor()
 
-    cursor.execute("SELECT Zipcode FROM zipcodes_two.zipcodes_two WHERE State = 'KY';")
-    for row in cursor.fetchall():
-        print(row)
+            # 1. Largest zipcode in zipcodes_one
+            query1 = "SELECT MAX(zipcode) FROM zipcodes_one;"
+            run_query(cursor, query1, "Largest zipcode in zipcodes_one:")
 
-    # Query 3: Zipcodes between 40000 and 41000 from both shards
-    print("\nZipcodes between 40000 and 41000:")
-    cursor.execute("SELECT Zipcode FROM zipcodes_one.zipcodes_one WHERE Zipcode BETWEEN 40000 AND 41000;")
-    for row in cursor.fetchall():
-        print(row)
+            # 2. All zipcodes where state = KY
+            query2 = "SELECT zipcode FROM zipcodes_one WHERE state = 'KY';"
+            run_query(cursor, query2, "All zipcodes where state = KY:")
 
-    cursor.execute("SELECT Zipcode FROM zipcodes_two.zipcodes_two WHERE Zipcode BETWEEN 40000 AND 41000;")
-    for row in cursor.fetchall():
-        print(row)
+            # 3. All zipcodes between 40000 and 41000
+            query3 = "SELECT zipcode FROM zipcodes_one WHERE zipcode BETWEEN 40000 AND 41000;"
+            run_query(cursor, query3, "All zipcodes between 40000 and 41000:")
 
-    # Query 4: Total wages for state 'PA' from both shards
-    print("\nTotalWages where state = PA:")
-    cursor.execute("SELECT TotalWages FROM zipcodes_one.zipcodes_one WHERE State = 'PA';")
-    for row in cursor.fetchall():
-        print(row)
+            # 4. TotalWages column where state = PA
+            query4 = "SELECT TotalWages FROM zipcodes_two WHERE state = 'PA';"
+            run_query(cursor, query4, "TotalWages for state = PA:")
 
-    cursor.execute("SELECT TotalWages FROM zipcodes_two.zipcodes_two WHERE State = 'PA';")
-    for row in cursor.fetchall():
-        print(row)
+            cursor.close()
+        else:
+            print("Failed to connect to database.")
 
-    # Close the cursor and connection when done
-    cursor.close()
-    db.close()
+    except Error as e:
+        print("Error while connecting or querying:", e)
+
+    finally:
+        if connection.is_connected():
+            connection.close()
 
 if __name__ == "__main__":
-    run_queries()
+    main()
+
