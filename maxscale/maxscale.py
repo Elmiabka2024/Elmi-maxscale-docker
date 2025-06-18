@@ -4,52 +4,48 @@
 # Class: CNE370
 # Description: Connects to MaxScale via schemarouter and performs queries on sharded MariaDB databases
 
-import mysql.connector
+import pymysql
 
-# Connect to MaxScale router on localhost at port 4006
-db = mysql.connector.connect(
-    host="127.0.0.1",
-    port=4006,
-    user="maxuser",
-    password="maxpwd"
+def query_zipcodes(database):
+    connection = pymysql.connect(
+        host='localhost',
+        port=4006,
+        user='maxuser',
+        password='maxpwd',
+        database=database,
+        cursorclass=pymysql.cursors.DictCursor
+    )
+    results = {}
+    try:
+        with connection.cursor() as cursor:
+            cursor.execute("SELECT MAX(Zipcode) AS largest_zipcode FROM zipcodes_one;")
+            results['largest_zipcode'] = cursor.fetchone()
+
+            cursor.execute("SELECT * FROM zipcodes_one WHERE State = 'KY';")
+            results['state_KY'] = cursor.fetchall()
+
+            cursor.execute("SELECT * FROM zipcodes_one WHERE Zipcode BETWEEN 40000 AND 41000;")
+            results['zipcode_range'] = cursor.fetchall()
+
+            cursor.execute("SELECT TotalWages FROM zipcodes_one WHERE State = 'PA';")
+            results['wages_PA'] = cursor.fetchall()
+
+    finally:
+        connection.close()
+    return results
+
+# Query both databases
+results_one = query_zipcodes('zipcodes_one')
+results_two = query_zipcodes('zipcodes_two')
+
+# Combine results where necessary
+largest_zipcode = max(
+    results_one['largest_zipcode']['largest_zipcode'] or 0,
+    results_two['largest_zipcode']['largest_zipcode'] or 0
 )
 
-cursor = db.cursor()
-
-# 1. Largest ZIP code in zipcodes_one
-print("The largest zipcode in zipcodes_one:")
-cursor.execute("SELECT Zipcode FROM zipcodes_one.zipcodes_one ORDER BY Zipcode DESC LIMIT 1;")
-for result in cursor.fetchall():
-    print(result[0])
-
-# 2. All zipcodes where state = 'KY' in both shards
-print("\nAll zipcodes where state = 'KY':")
-for db_name in ["zipcodes_one", "zipcodes_two"]:
-    query = f"SELECT Zipcode FROM {db_name}.{db_name} WHERE State = 'KY';"
-    cursor.execute(query)
-    for result in cursor.fetchall():
-        if result[0]:
-            print(result[0])
-
-# 3. Zipcodes between 40000 and 41000 from both shards
-print("\nAll zipcodes between 40000 and 41000:")
-for db_name in ["zipcodes_one", "zipcodes_two"]:
-    query = f"SELECT Zipcode FROM {db_name}.{db_name} WHERE Zipcode BETWEEN 40000 AND 41000;"
-    cursor.execute(query)
-    for result in cursor.fetchall():
-        if result[0]:
-            print(result[0])
-
-# 4. TotalWages where state = 'PA' from both shards
-print("\nThe TotalWages values where state = 'PA':")
-for db_name in ["zipcodes_one", "zipcodes_two"]:
-    query = f"SELECT TotalWages FROM {db_name}.{db_name} WHERE State = 'PA';"
-    cursor.execute(query)
-    for result in cursor.fetchall():
-        if result[0]:
-            print(result[0])
-
-# Clean up
-cursor.close()
-db.close()
+print("Largest Zipcode:", largest_zipcode)
+print("Zipcodes in KY:", results_one['state_KY'] + results_two['state_KY'])
+print("Zipcodes between 40000 and 41000:", results_one['zipcode_range'] + results_two['zipcode_range'])
+print("Total Wages in PA:", results_one['wages_PA'] + results_two['wages_PA'])
 
