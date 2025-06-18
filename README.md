@@ -9,6 +9,7 @@ Two MariaDB containers (shard1 and shard2), each hosting:
 zipcodes_one (on shard1)
 
 zipcodes_two (on shard2)
+
 One MaxScale container to route client queries based on the schema.
 
 
@@ -18,11 +19,10 @@ git clone git@github.com:Elmiabka2024/elmi-maxscale-docker.git
 cd elmi-maxscale-docker
 ```
 
----
 
 ## Building
 
-```
+`
 build the image to start up
 ```
 sudo docker compose up build
@@ -30,6 +30,7 @@ sudo docker compose up build
 ```
 
 ## Running
+
 Make sure you are in the root project directory where your configuration files and SQL data files are located
  ```
 docker-compose.yml
@@ -57,7 +58,8 @@ MaxScale Setup
 MaxScale is configured via a mounted config file located at:
 
 
-```./maxscale/maxscale.cnf.d/example.cnf
+```
+./maxscale/maxscale.cnf.d/example.cnf
 ```
 
 Key configuration components:
@@ -69,13 +71,12 @@ Router: schemarouter — routes queries based on database name
 Monitor: mariadbmon for basic health checking (auto-failover disabled)
 
 Listener: Listens on port 4006
+
 ### Databases
-shard1.sql 
- contains the zipcodes_one database
 
-shard2.sql
+shard1.sql: contains the zipcodes_one database
 
-contains the zipcodes_two database
+shard2.sql: contains the zipcodes_two database
 
 ### Authentication
 MaxScale and the shards use the following credentials (defined in user.sql and used in MaxScale config):
@@ -93,9 +94,18 @@ MaxScale to connect to the shards
 The Python client to connect to MaxScale
 
 ### ports
-shard1: host port 4001 and container port 3306
-shard2: host port 4002 and container port 3306
-maxscale: exposes listener on port 4006
+
+To get ports and container that are up and running run:
+
+```
+sudo docker ps
+```
+
+| Container Name | Image            | Host Port(s)       | Container Port(s) | Description                    |
+|----------------|------------------|--------------------|-------------------|--------------------------------|
+| maxscale       | maxscale-maxscale| 4006, 8989         | 4006, 8989        | MaxScale listener and admin ports |
+| shard1         | mariadb:10.3     | 4001               | 3306              | MariaDB Shard 1                |
+| shard2         | mariadb:10.3     | 4002               | 3306              | MariaDB Shard 2                |
 
 ## Connecting to containers
 
