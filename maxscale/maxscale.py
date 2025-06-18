@@ -6,53 +6,50 @@
 
 import mysql.connector
 
-def run_query(cursor, query, description):
-    """Run a query and print the results with a label."""
-    print(f"\n{description}")
+# Connect to MaxScale router on localhost at port 4006
+db = mysql.connector.connect(
+    host="127.0.0.1",
+    port=4006,
+    user="maxuser",
+    password="maxpwd"
+)
+
+cursor = db.cursor()
+
+# 1. Largest ZIP code in zipcodes_one
+print("The largest zipcode in zipcodes_one:")
+cursor.execute("SELECT Zipcode FROM zipcodes_one.zipcodes_one ORDER BY Zipcode DESC LIMIT 1;")
+for result in cursor.fetchall():
+    print(result[0])
+
+# 2. All zipcodes where state = 'KY' in both shards
+print("\nAll zipcodes where state = 'KY':")
+for db_name in ["zipcodes_one", "zipcodes_two"]:
+    query = f"SELECT Zipcode FROM {db_name}.{db_name} WHERE State = 'KY';"
     cursor.execute(query)
-    results = cursor.fetchall()
-    if results:
-        for row in results:
-            print(row)
-    else:
-        print("No results found.")
+    for result in cursor.fetchall():
+        if result[0]:
+            print(result[0])
 
-def main():
-    try:
-        # Connect to MaxScale using static config
-        connection = mysql.connector.connect(
-            host='127.0.0.1',
-            port=4006,
-            user='maxuser',
-            password='maxpwd'
-        )
-        print("Connected to MaxScale.")
+# 3. Zipcodes between 40000 and 41000 from both shards
+print("\nAll zipcodes between 40000 and 41000:")
+for db_name in ["zipcodes_one", "zipcodes_two"]:
+    query = f"SELECT Zipcode FROM {db_name}.{db_name} WHERE Zipcode BETWEEN 40000 AND 41000;"
+    cursor.execute(query)
+    for result in cursor.fetchall():
+        if result[0]:
+            print(result[0])
 
-        # Databases and matching table names
-        databases = {
-            'zipcodes_one': 'zipcodes_one',
-            'zipcodes_two': 'zipcodes_two'
-        }
+# 4. TotalWages where state = 'PA' from both shards
+print("\nThe TotalWages values where state = 'PA':")
+for db_name in ["zipcodes_one", "zipcodes_two"]:
+    query = f"SELECT TotalWages FROM {db_name}.{db_name} WHERE State = 'PA';"
+    cursor.execute(query)
+    for result in cursor.fetchall():
+        if result[0]:
+            print(result[0])
 
-        for db_name, table_name in databases.items():
-            connection.database = db_name
-            cursor = connection.cursor()
-            print(f"\nUsing database: {db_name}")
-
-            # Required queries
-            run_query(cursor, f"SELECT MAX(Zipcode) FROM {table_name};", "Largest ZIP code")
-            run_query(cursor, f"SELECT * FROM {table_name} WHERE State = 'KY';", "ZIP codes in KY")
-            run_query(cursor, f"SELECT * FROM {table_name} WHERE Zipcode BETWEEN 40000 AND 41000;", "ZIP codes between 40000 and 41000")
-            run_query(cursor, f"SELECT TotalWages FROM {table_name} WHERE State = 'PA';", "TotalWages in PA")
-
-            cursor.close()
-
-        connection.close()
-        print("Done. Connection closed.")
-
-    except mysql.connector.Error as err:
-        print(f"Connection failed: {err}")
-
-if __name__ == "__main__":
-    main()
+# Clean up
+cursor.close()
+db.close()
 
