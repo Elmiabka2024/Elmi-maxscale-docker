@@ -8,7 +8,7 @@ import pymysql
 
 def query_zipcodes(database):
     connection = pymysql.connect(
-        host='localhost',
+        host='127.0.0.1',
         port=4006,
         user='maxuser',
         password='maxpwd',
