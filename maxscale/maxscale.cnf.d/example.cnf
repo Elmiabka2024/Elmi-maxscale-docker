@@ -25,6 +25,8 @@ type=service
 router=schemarouter
 user=maxuser
 password=maxpwd
+servers=shard1,shard2
+
 
 [ShardingListener]
 type=listener
