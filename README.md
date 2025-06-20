@@ -43,7 +43,7 @@ sudo docker ps
 ```
 stop and clean up the environment
 ```
-sudo compose down
+sudo docker  compose down
 ```
 
 remove volumes
